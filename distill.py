@@ -144,7 +144,7 @@ def main(args):
     label_syn = torch.tensor([np.ones(args.ipc,dtype=np.int_)*i for i in range(num_classes)], dtype=torch.long, requires_grad=False, device=args.device).view(-1)
 
     if args.texture:
-        image_syn = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
+        image_syn_1 = torch.randn(size=(num_classes * args.ipc, channel, im_size[0]*args.canvas_size, im_size[1]*args.canvas_size), dtype=torch.float)
     else:
         image_syn_1 = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
         image_syn_2 = torch.randn(size=(num_classes * args.ipc, channel, im_size[0], im_size[1]), dtype=torch.float)
@@ -205,14 +205,14 @@ def main(args):
             for c in range(num_classes):
                 for i in range(args.canvas_size):
                     for j in range(args.canvas_size):
-                        image_syn.data[c * args.ipc:(c + 1) * args.ipc, :, i * im_size[0]:(i + 1) * im_size[0],
+                        image_syn_1.data[c * args.ipc:(c + 1) * args.ipc, :, i * im_size[0]:(i + 1) * im_size[0],
                         j * im_size[1]:(j + 1) * im_size[1]] = torch.cat(
                             [get_images(c, 1).detach().data for s in range(args.ipc)])
         for c in range(num_classes):
             idx_shuffle=get_init_images(c,args.ipc)
             #idx_shuffle=torch.tensor(np.array(idx_list[c]))
-            image_syn.data[c * args.ipc:(c + 1) * args.ipc] = images_all[idx_shuffle].detach().data
-            image_syn_m.data[c * args.ipc:(c + 1) * args.ipc] = images_all[idx_shuffle].detach().data
+            image_syn_1.data[c * args.ipc:(c + 1) * args.ipc] = images_all[idx_shuffle].detach().data
+            image_syn_2.data[c * args.ipc:(c + 1) * args.ipc] = images_all[idx_shuffle].detach().data
             image_embed.data[c * args.ipc:(c + 1) * args.ipc] = images_all[idx_shuffle].detach().data
 
     else:
@@ -313,7 +313,7 @@ def main(args):
     for it in range(0, args.Iteration+1):
         save_this_it = False
   
-        image=args.alpha*image_syn+args.beta*image_syn_m+args.gamma*image_embed
+        image=args.alpha*image_syn_1+args.beta*image_syn_2+args.gamma*image_embed
   
       
 
